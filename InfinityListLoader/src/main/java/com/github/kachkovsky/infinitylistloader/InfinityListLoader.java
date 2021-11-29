@@ -4,6 +4,7 @@ import com.github.kachkovsky.infinitylistloader.combiningrepomnses.ListResult;
 import com.github.kachkovsky.infinitylistloader.combiningrepomnses.ResponseCombiner;
 import com.github.kachkovsky.infinitylistloader.threading.WorkerThreadAndMainHandler;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InfinityListLoader<T, E> extends ConcurrentRepository {
@@ -20,6 +21,7 @@ public class InfinityListLoader<T, E> extends ConcurrentRepository {
     private ListResult<T, E> result;
 
     InfinityListLoader(int threadNumber) {
+        result = new ListResult<>(new ArrayList<>(), null, false, null);
         worker = new WorkerThreadAndMainHandler();
         worker.initAndStart("InfinityListWorkerThread" + threadNumber, msg -> {
             switch (msg.what) {
