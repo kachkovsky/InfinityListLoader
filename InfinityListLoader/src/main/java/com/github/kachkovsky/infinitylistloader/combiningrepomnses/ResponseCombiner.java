@@ -19,7 +19,7 @@ public abstract class ResponseCombiner<T> {
         this.context = context;
     }
 
-    public boolean addPart(int index, DataSource dataSource, List<T> response) {
+    public boolean addPart(int index, DataSource dataSource, List<T> response, boolean finished) {
         if (index == data.size()) {
             data.add(new Part<>(response, dataSource));
             return mergeResults(index, response);
@@ -27,6 +27,11 @@ public abstract class ResponseCombiner<T> {
             //update data only from remote sources
             if (DataSource.REMOTE.equals(dataSource)) {
                 data.set(index, new Part<>(response, dataSource));
+                if (finished) {
+                    while (index + 1 < data.size()) {
+                        data.remove(index + 1);
+                    }
+                }
                 return mergeResults(index, response);
             } else {
                 return false;

@@ -122,21 +122,23 @@ class ConcurrentCacheLoader<T, E> extends BaseLoader<T, E> {
                 int index = position.getIndexToRequest();
                 if (requestResult.isSuccessful()) {
                     position.incrementIndexToRequest();
+                    if (requestResult.isListFinished()) {
+                        cacheEnabled = false;
+                    }
                 } else if (DataSource.LOCAL.equals(position.getDataSource())) {
                     cacheEnabled = false;
                 }
-
-                if (requestResult.isSuccessful()) {
-                    responseCombiner.addPart(index, position.getDataSource(), requestResult.getResponseList());
+                if (!(loadFinished && position == cachePosition)) {
+                    boolean finished = requestResult.isListFinished() && DataSource.REMOTE.equals(position.getDataSource());
+                    if (requestResult.isSuccessful()) {
+                        responseCombiner.addPart(index, position.getDataSource(), requestResult.getResponseList(), finished);
+                    }
+                    loadFinished = finished;
+                    E errorMessage = (position == cachePosition) ? null : requestResult.getErrorMessage();
+                    setListResult(new ListResult<>(responseCombiner.getResultList(), position.getDataSource(), requestResult.isListFinished(), errorMessage));
                 }
-                E errorMessage = (position == cachePosition) ? null : requestResult.getErrorMessage();
-                setListResult(new ListResult<>(responseCombiner.getResultList(), position.getDataSource(), requestResult.isListFinished(), errorMessage));
-
             }
             if (requestResult.isSuccessful()) {
-                if (requestResult.isListFinished()) {
-                    cacheEnabled = false;
-                }
                 worker.getWorkerHandler().sendEmptyMessage(InfinityListLoader.MESSAGE_LOAD_PART_IF_CAN);
             }
         }
@@ -144,10 +146,6 @@ class ConcurrentCacheLoader<T, E> extends BaseLoader<T, E> {
 
     @Override
     protected void setListResult(ListResult<T, E> result) {
-        loadFinished = result.isFinished();
-        if (loadFinished) {
-            cacheEnabled = false;
-        }
         super.setListResult(result);
     }
 
