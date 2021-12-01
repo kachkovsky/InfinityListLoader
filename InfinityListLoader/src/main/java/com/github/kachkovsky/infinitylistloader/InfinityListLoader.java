@@ -52,7 +52,13 @@ public class InfinityListLoader<T, E> extends ConcurrentRepository {
         loader.setupLoader(ccl);
         return loader;
     }
-
+    public static <T, E> InfinityListLoader<T, E> createNetworkOnlyLoader(ResponseCombiner<T> responseCombiner, SourceLoader<T, E> networkLoader) {
+        int i = threadNumber.addAndGet(1);
+        InfinityListLoader<T, E> loader = new InfinityListLoader<>(i);
+        NetworkOnlyLoader<T, E> nol = new NetworkOnlyLoader<>(loader, loader.worker, i, responseCombiner, networkLoader);
+        loader.setupLoader(nol);
+        return loader;
+    }
     void setupLoader(BaseLoader<T, E> loader) {
         this.loader = loader;
         this.loader.initAndStart();

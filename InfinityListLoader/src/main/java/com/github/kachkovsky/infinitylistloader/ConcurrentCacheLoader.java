@@ -138,7 +138,7 @@ class ConcurrentCacheLoader<T, E> extends BaseLoader<T, E> {
                     setListResult(new ListResult<>(responseCombiner.getResultList(), position.getDataSource(), requestResult.isListFinished(), errorMessage));
                 }
             }
-            if (requestResult.isSuccessful()) {
+            if (requestResult.isSuccessful() && !loadFinished) {
                 worker.getWorkerHandler().sendEmptyMessage(InfinityListLoader.MESSAGE_LOAD_PART_IF_CAN);
             }
         }
