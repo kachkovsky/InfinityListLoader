@@ -52,6 +52,7 @@ public class InfinityListLoader<T, E> extends ConcurrentRepository {
         loader.setupLoader(ccl);
         return loader;
     }
+
     public static <T, E> InfinityListLoader<T, E> createNetworkOnlyLoader(ResponseCombiner<T> responseCombiner, SourceLoader<T, E> networkLoader) {
         int i = threadNumber.addAndGet(1);
         InfinityListLoader<T, E> loader = new InfinityListLoader<>(i);
@@ -59,6 +60,15 @@ public class InfinityListLoader<T, E> extends ConcurrentRepository {
         loader.setupLoader(nol);
         return loader;
     }
+
+    public static <T, E> InfinityListLoader<T, E> createCacheOnErrorLoader(ResponseCombiner<T> responseCombiner, SourceLoader<T, E> networkLoader, SourceLoader<T, E> cacheLoader) {
+        int i = threadNumber.addAndGet(1);
+        InfinityListLoader<T, E> loader = new InfinityListLoader<>(i);
+        CacheOnErrorLoader<T, E> ccl = new CacheOnErrorLoader<>(loader, loader.worker, i, responseCombiner, networkLoader, cacheLoader);
+        loader.setupLoader(ccl);
+        return loader;
+    }
+
     void setupLoader(BaseLoader<T, E> loader) {
         this.loader = loader;
         this.loader.initAndStart();
