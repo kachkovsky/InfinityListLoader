@@ -145,11 +145,6 @@ class ConcurrentCacheLoader<T, E> extends BaseLoader<T, E> {
     }
 
     @Override
-    protected void setListResult(ListResult<T, E> result) {
-        super.setListResult(result);
-    }
-
-    @Override
     public void dispose() {
         super.dispose();
         cacheThread.quit();
